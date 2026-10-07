@@ -1,12 +1,11 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Shield,
   ShieldCheck,
   FileText,
   Lock,
-  Unlock,
   Brain,
   Network,
   Briefcase,
@@ -15,22 +14,16 @@ import {
   AlertTriangle,
   Eye,
   EyeOff,
-  Download,
   Upload,
   Activity,
   Layers,
-  Search,
   Sparkles,
   RefreshCw,
   UserCheck,
   Compass,
   FileCheck,
   ChevronRight,
-  Database,
-  ArrowUpRight,
-  Sliders,
-  ExternalLink,
-  Info
+  ArrowUpRight
 } from 'lucide-react';
 import { api } from '@/lib/api';
 import {
@@ -40,7 +33,6 @@ import {
   Opportunity,
   EligibilityReport,
   DisclosurePreview,
-  VerifiablePresentationPackage,
   CareerGaps,
   AuditLogItem,
   GraphData
@@ -60,7 +52,7 @@ type ActiveTab =
 export default function VerifaiApp() {
   const [activeTab, setActiveTab] = useState<ActiveTab>('dashboard');
   const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(null);
+  const [token, setToken] = useState<string | null>(() => (typeof window !== 'undefined' ? api.getToken() : null));
   const [loading, setLoading] = useState<boolean>(true);
   const [actionLoading, setActionLoading] = useState<boolean>(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
@@ -69,7 +61,7 @@ export default function VerifaiApp() {
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
   const [email, setEmail] = useState('researcher@verifai.io');
   const [password, setPassword] = useState('ResearchPassword123!');
-  const [fullName, setFullName] = useState('Dr. Prajwal V.');
+  const [fullName, setFullName] = useState('Dr. Alex Rivera');
 
   // Data States
   const [dashboard, setDashboard] = useState<any>(null);
@@ -93,15 +85,47 @@ export default function VerifaiApp() {
     'Applicants must possess a Bachelor degree in Computer Science (CSE) with minimum CGPA of 8.0 or above. Proficiency in Python and Machine Learning is required. Experience with Cloud or Docker is preferred.'
   );
 
+  const fetchUserData = useCallback(async () => {
+    setLoading(true);
+    try {
+      const [dash, docsRes, claimsRes, oppsRes, gaps, logsRes, graphRes] = await Promise.all([
+        api.getDashboardSummary().catch(() => null),
+        api.listDocuments().catch(() => ({ documents: [] })),
+        api.listCredentials().catch(() => ({ claims: [] })),
+        api.listOpportunities().catch(() => ({ opportunities: [] })),
+        api.getCareerGaps().catch(() => null),
+        api.getAuditLogs().catch(() => ({ logs: [] })),
+        api.getKnowledgeGraph().catch(() => null),
+      ]);
+
+      if (dash) {
+        setDashboard(dash);
+        setUser(dash.user);
+      }
+      setDocuments(docsRes.documents || []);
+      setClaims(claimsRes.claims || []);
+      setOpportunities(oppsRes.opportunities || []);
+      setCareerGaps(gaps);
+      setAuditLogs(logsRes.logs || []);
+      setGraphData(graphRes);
+
+      if (oppsRes.opportunities && oppsRes.opportunities.length > 0) {
+        setSelectedOpportunity((prev) => prev || oppsRes.opportunities[0]);
+      }
+    } catch (err: any) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
-    const existingToken = api.getToken();
-    if (existingToken) {
-      setToken(existingToken);
+    if (token) {
       fetchUserData();
     } else {
       setLoading(false);
     }
-  }, []);
+  }, [token, fetchUserData]);
 
   const showNotification = (text: string, type: 'success' | 'error' = 'success') => {
     setMessage({ text, type });
@@ -136,40 +160,6 @@ export default function VerifaiApp() {
     setToken(null);
     setUser(null);
     showNotification('Logged out successfully.');
-  };
-
-  const fetchUserData = async () => {
-    setLoading(true);
-    try {
-      const [dash, docsRes, claimsRes, oppsRes, gaps, logsRes, graphRes] = await Promise.all([
-        api.getDashboardSummary().catch(() => null),
-        api.listDocuments().catch(() => ({ documents: [] })),
-        api.listCredentials().catch(() => ({ claims: [] })),
-        api.listOpportunities().catch(() => ({ opportunities: [] })),
-        api.getCareerGaps().catch(() => null),
-        api.getAuditLogs().catch(() => ({ logs: [] })),
-        api.getKnowledgeGraph().catch(() => null),
-      ]);
-
-      if (dash) {
-        setDashboard(dash);
-        setUser(dash.user);
-      }
-      setDocuments(docsRes.documents || []);
-      setClaims(claimsRes.claims || []);
-      setOpportunities(oppsRes.opportunities || []);
-      setCareerGaps(gaps);
-      setAuditLogs(logsRes.logs || []);
-      setGraphData(graphRes);
-
-      if (oppsRes.opportunities && oppsRes.opportunities.length > 0 && !selectedOpportunity) {
-        setSelectedOpportunity(oppsRes.opportunities[0]);
-      }
-    } catch (err: any) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
   };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {

@@ -1,52 +1,96 @@
-# Python
+# ==============================================================================
+# VERIFAI — Git Ignore Rules
+# ==============================================================================
+
+# ------------------------------------------------------------------------------
+# Environment Variables & Secrets (CRITICAL: Never commit secrets)
+# ------------------------------------------------------------------------------
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.cert
+*.crt
+
+# ------------------------------------------------------------------------------
+# Python & Virtual Environments
+# ------------------------------------------------------------------------------
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
 .Python
+venv/
+.venv/
 backend/venv/
 backend/.venv/
 env/
-venv/
 ENV/
 *.egg-info/
 .installed.cfg
 *.egg
+
+# Testing & Coverage
 .pytest_cache/
 .coverage
 htmlcov/
 .mypy_cache/
+.ruff_cache/
 
-# Node / Frontend
+# ------------------------------------------------------------------------------
+# Node.js & Frontend
+# ------------------------------------------------------------------------------
+node_modules/
 frontend/node_modules/
+.next/
 frontend/.next/
+out/
 frontend/out/
+build/
 frontend/build/
+dist/
+.turbo/
 frontend/.turbo/
-.npm
+.npm/
 *.tsbuildinfo
+next-env.d.ts
 
-# Environment variables & secrets
-.env
-.env.local
-.env.*.local
-*.pem
-*.key
-
-# Data & Vault storage
-backend/data/
+# ------------------------------------------------------------------------------
+# Data, Storage, Vault & Runtime Artifacts
+# ------------------------------------------------------------------------------
+vault_storage/
 backend/vault_storage/
+uploads/
+storage/
+temp/
+logs/
+*.log
+backend/data/
+
+# Databases
 *.db
 *.sqlite
 *.sqlite3
 
-# Operating System
+# ------------------------------------------------------------------------------
+# Operating System Files
+# ------------------------------------------------------------------------------
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
 Thumbs.db
 desktop.ini
 
-# IDEs
+# ------------------------------------------------------------------------------
+# IDE & Editor Configurations
+# ------------------------------------------------------------------------------
 .idea/
 .vscode/
 *.swp
 *.swo
+*.sublime-project
+*.sublime-workspace

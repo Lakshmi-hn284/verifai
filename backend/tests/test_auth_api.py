@@ -11,7 +11,7 @@ async def test_register_and_login_flow(client: AsyncClient):
     reg_payload = {
         "email": "researcher@verifai.io",
         "password": "SecurePassword123!",
-        "full_name": "Prajwal Researcher"
+        "full_name": "Dr. Alex Rivera"
     }
     reg_res = await client.post("/api/v1/auth/register", json=reg_payload)
     assert reg_res.status_code == 201
@@ -39,7 +39,7 @@ async def test_register_and_login_flow(client: AsyncClient):
     headers = {"Authorization": f"Bearer {token}"}
     me_res = await client.get("/api/v1/users/me", headers=headers)
     assert me_res.status_code == 200
-    assert me_res.json()["data"]["full_name"] == "Prajwal Researcher"
+    assert me_res.json()["data"]["full_name"] == "Dr. Alex Rivera"
 
     # 5. Check Audit Logs
     audit_res = await client.get("/api/v1/audit/logs", headers=headers)

@@ -12,7 +12,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
-        env_file=str(BASE_DIR / ".env"),
+        env_file=(str(BASE_DIR.parent / ".env"), str(BASE_DIR / ".env")),
         env_file_encoding="utf-8",
         extra="ignore"
     )
@@ -25,8 +25,9 @@ class Settings(BaseSettings):
     DEBUG: bool = True
 
     # Security & Cryptography
+    # WARNING: Override SECRET_KEY in production via environment variable!
     SECRET_KEY: str = Field(
-        default="verifai-super-secret-key-32-chars-long-development-only-replace!",
+        default="verifai-dev-insecure-secret-key-change-in-production-32chars!",
         description="JWT signing secret key"
     )
     ALGORITHM: str = "HS256"
@@ -34,7 +35,7 @@ class Settings(BaseSettings):
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
 
     # AES-256-GCM Vault Master Key (Must be 32 bytes in hex, i.e., 64 chars)
-    # Default 32-byte hex key for development:
+    # WARNING: Override VAULT_MASTER_KEY_HEX in production via environment variable!
     VAULT_MASTER_KEY_HEX: str = Field(
         default="0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
         description="Hex-encoded 32-byte key for AES-256-GCM vault encryption"
@@ -53,7 +54,7 @@ class Settings(BaseSettings):
     USE_LOCAL_GRAPH: bool = True
     NEO4J_URI: Optional[str] = "bolt://localhost:7687"
     NEO4J_USER: Optional[str] = "neo4j"
-    NEO4J_PASSWORD: Optional[str] = "verifai_neo4j_secret"
+    NEO4J_PASSWORD: Optional[str] = None
 
     # AI Model Providers
     GEMINI_API_KEY: Optional[str] = None
